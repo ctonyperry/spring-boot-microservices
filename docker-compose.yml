@@ -38,6 +38,19 @@ services:
     environment:
       - GRADLE_USER_HOME=cache
       - SPRING_PROFILES_ACTIVE=dev
+  songs-api:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8082:8082'
+    working_dir: /app
+    volumes:
+      - ./songs-api:/app
+    depends_on:
+      - eureka 
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev           
   postgresdev:
     image: postgres
     ports:
@@ -46,3 +59,10 @@ services:
      - POSTGRES_PASSWORD=password
      - POSTGRES_USER=postgres
      - POSTGRES_DB=pgdev
+  flyway:
+    image: jimmyoak/flyway:4.0.3
+    command: "wait-for-it --timeout=300  --strict postgresdev:5432 -- flyway migrate"
+    volumes:
+      - './flyway/conf:/flyway/conf'
+      - './flyway/sql:/flyway/sql'
+      
